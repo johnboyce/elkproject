@@ -33,7 +33,7 @@ jobs:
 
       - name: Replace Task Execution Role
         run: |
-          sed -i "s|arn:aws:iam::020157571320:role/elkproject-ecs-task-execution-role|${{ secrets.ECS_TASK_EXECUTION_ROLE }}|" taskdefinitions/ecs-task-definition.json
+          sed -i "s|arn:aws:iam::020157571320:role/elkproject-ecs-task-execution-role|${{ secrets.ECS_TASK_EXECUTION_ROLE }}|" task-definitions/quarkus-app-task.json
 
       - name: Register Task Definition
         run: |

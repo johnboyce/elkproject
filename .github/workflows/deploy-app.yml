@@ -24,29 +24,76 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Fetch Latest Task Definition
-        id: fetch-task
+      - name: Check if Task Definition Exists
+        id: check-task
         run: |
-          TASK_FAMILY="elkproject"
-          aws ecs describe-task-definition --task-definition $TASK_FAMILY > task-def.json
+          set +e
+          aws ecs describe-task-definition --task-definition elkproject > task-def.json 2>/dev/null
+          if [ $? -eq 0 ]; then
+            echo "TASK_DEFINITION_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TASK_DEFINITION_EXISTS=false" >> $GITHUB_ENV
+          fi
+          set -e
 
-      - name: Update Task Definition with New Image
-        id: update-task
+      - name: Create Task Definition if Not Exists
+        if: env.TASK_DEFINITION_EXISTS == 'false'
         run: |
-          IMAGE="${{ secrets.ECR_URI }}/elkproject:${{ github.event.inputs.image_tag }}"
-          jq '.taskDefinition | .containerDefinitions[0].image = $IMAGE' task-def.json > updated-task-def.json
+          cat <<EOF > task-def.json
+          {
+            "family": "elkproject",
+            "networkMode": "awsvpc",
+            "executionRoleArn": "${{ secrets.ECS_EXECUTION_ROLE_ARN }}",
+            "containerDefinitions": [
+              {
+                "name": "elkproject-container",
+                "image": "${{ secrets.ECR_URI }}/elkproject:${{ github.event.inputs.image_tag }}",
+                "essential": true,
+                "portMappings": [
+                  {
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp"
+                  }
+                ],
+                "logConfiguration": {
+                  "logDriver": "awslogs",
+                  "options": {
+                    "awslogs-group": "/ecs/elkproject",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                  }
+                }
+              }
+            ],
+            "requiresCompatibilities": ["FARGATE"],
+            "cpu": "256",
+            "memory": "512"
+          }
+          EOF
 
-      - name: Register Updated Task Definition
-        id: register-task
+      - name: Register Task Definition
         run: |
-          aws ecs register-task-definition --cli-input-json file://updated-task-def.json > register-task-output.json
+          aws ecs register-task-definition --cli-input-json file://task-def.json > register-task-output.json
           TASK_REVISION=$(jq -r '.taskDefinition.revision' register-task-output.json)
           echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
 
-      - name: Update ECS Service to Use New Task Definition
+      - name: Create ECS Service if Not Exists
+        if: env.TASK_DEFINITION_EXISTS == 'false'
+        run: |
+          aws ecs create-service \
+            --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
+            --service-name elkproject-service \
+            --task-definition elkproject:$TASK_REVISION \
+            --desired-count 1 \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNET_IDS }}],securityGroups=[${{ secrets.SECURITY_GROUP_IDS }}],assignPublicIp=ENABLED}" \
+            --launch-type FARGATE
+
+      - name: Update ECS Service
+        if: env.TASK_DEFINITION_EXISTS == 'true'
         run: |
           aws ecs update-service \
             --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
             --service elkproject-service \
-            --task-definition ${{ secrets.ECS_TASK_FAMILY }}:$TASK_REVISION \
+            --task-definition elkproject:$TASK_REVISION \
             --force-new-deployment

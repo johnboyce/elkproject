@@ -1,12 +1,13 @@
 {
-  "family": "quarkus-app-task",
+  "family": "elkproject",
   "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::020157571320:role/elkproject-ecs-task-execution-role",
   "containerDefinitions": [
     {
-      "name": "quarkus-app",
-      "image": "${ECR_URI}/quarkus-app:latest",
-      "memory": 512,
+      "name": "elkproject-container",
+      "image": "020157571320.dkr.ecr.us-east-1.amazonaws.com/elkproject:latest",
       "cpu": 256,
+      "memory": 512,
       "essential": true,
       "portMappings": [
         {
@@ -18,16 +19,21 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/quarkus-app",
+          "awslogs-group": "/ecs/elkproject",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
         }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8080/healthcheck || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 10
       }
     }
   ],
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
-  "memory": "512",
-  "executionRoleArn": "arn:aws:iam::020157571320:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::020157571320:role/ecsTaskRole"
+  "memory": "512"
 }

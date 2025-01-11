@@ -1,9 +1,13 @@
 name: Build Native Image and Push to ECR
 
 on:
-  push:
-    branches:
-      - main
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+
+#on:
+#  push:
+#    branches:
+#      - main
 
 jobs:
   build-native:
@@ -45,13 +49,20 @@ jobs:
         working-directory: app
         run: ./mvnw -Pnative package -Dquarkus.native.container-build=true
 
-      - name: Build Docker Image
+      - name: Extract Short SHA
+        working-directory: app
+        id: extract-sha
+        run: echo "SHORT_SHA=$(echo $GITHUB_SHA | cut -c1-8)" >> $GITHUB_ENV
+
+      - name: Build Docker Image with Short SHA and Latest Tags
         working-directory: app
         run: |
-          docker build -t ${{ secrets.ECR_URI }}:${{ github.sha }} -f src/main/docker/Dockerfile.native .
+          docker build -t ${{ secrets.ECR_URI }}/elkproject:${{ env.SHORT_SHA }} -t ${{ secrets.ECR_URI }}/elkproject:latest -f src/main/docker/Dockerfile.native .
 
       - name: Push Docker Image to ECR
-        run: docker push ${{ secrets.ECR_URI }}:${{ github.sha }}
+        run: |
+          docker push ${{ secrets.ECR_URI }}/elkproject:${{ env.SHORT_SHA }}
+          docker push ${{ secrets.ECR_URI }}/elkproject:latest
 
       - name: Output Image Tag
-        run: echo "IMAGE_TAG=elkproject:${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "IMAGE_TAG=${{ env.SHORT_SHA }}" >> $GITHUB_ENV

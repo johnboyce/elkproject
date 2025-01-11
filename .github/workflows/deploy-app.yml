@@ -1,0 +1,52 @@
+name: Deploy to ECS
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "The tag of the container image to deploy"
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy Quarkus App to ECS
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Fetch Latest Task Definition
+        id: fetch-task
+        run: |
+          TASK_FAMILY="elkproject"
+          aws ecs describe-task-definition --task-definition $TASK_FAMILY > task-def.json
+
+      - name: Update Task Definition with New Image
+        id: update-task
+        run: |
+          IMAGE="${{ secrets.ECR_URI }}/elkproject:${{ github.event.inputs.image_tag }}"
+          jq '.taskDefinition | .containerDefinitions[0].image = $IMAGE' task-def.json > updated-task-def.json
+
+      - name: Register Updated Task Definition
+        id: register-task
+        run: |
+          aws ecs register-task-definition --cli-input-json file://updated-task-def.json > register-task-output.json
+          TASK_REVISION=$(jq -r '.taskDefinition.revision' register-task-output.json)
+          echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
+
+      - name: Update ECS Service to Use New Task Definition
+        run: |
+          aws ecs update-service \
+            --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
+            --service elkproject-service \
+            --task-definition ${{ secrets.ECS_TASK_FAMILY }}:$TASK_REVISION \
+            --force-new-deployment

@@ -1,0 +1,47 @@
+name: Build Native Image and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-native:
+    name: Build and Push Native Image
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+
+      - name: Build Quarkus Native Image
+        working-directory: app
+        run: ./mvnw package -Pnative -Dquarkus.native.container-build=true
+
+      - name: Build Docker Image
+        working-directory: app
+        run: |
+          docker build -t ${{ secrets.ECR_URI }}/elkproject:${{ github.sha }} -f src/main/docker/Dockerfile.native .
+
+      - name: Push Docker Image to ECR
+        run: docker push ${{ secrets.ECR_URI }}/elkproject:${{ github.sha }}
+
+      - name: Output Image Tag
+        run: echo "IMAGE_TAG=elkproject:${{ github.sha }}" >> $GITHUB_ENV

@@ -5,11 +5,14 @@ RUN sudo apt-get install zlib1g build-essential libz-dev zlib1g-dev
 WORKDIR /work
 COPY target/*-runner /work/application
 
-# Stage 2: Create the Final Image
-FROM gcr.io/distroless/base-debian11
-RUN sudo apt-get install zlib1g build-essential libz-dev zlib1g-dev
-# Copy the native binary from the builder stage
+# Stage 2: Use Red Hat's UBI Minimal Image
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.8
+
+# Copy the application binary from the builder stage
 COPY --from=builder /work/application /work/application
+
+# Install the missing library
+RUN microdnf install -y zlib && microdnf clean all
 
 # Set the binary as the entrypoint
 ENTRYPOINT ["/work/application"]

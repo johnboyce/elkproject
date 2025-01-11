@@ -1,35 +1,22 @@
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${var.application_name}-terraform-state"
-
-  # Prevent Terraform from deleting the bucket
-  lifecycle {
-    prevent_destroy = true
-  }
+resource "aws_subnet" "public" {
+  count = 3
+  vpc_id = var.vpc_id
+  cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index)
+  availability_zone = element(["us-east-1a", "us-east-1b", "us-east-1c"], count.index)
+  map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.application_name}-state"
+    Name = "${var.application_name}-public-${count.index + 1}"
   }
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_encryption" {
-  bucket = aws_s3_bucket.terraform_state.id
+resource "aws_subnet" "private" {
+  count = 3
+  vpc_id = var.vpc_id
+  cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index + 3)
+  availability_zone = element(["us-east-1a", "us-east-1b", "us-east-1c"], count.index)
 
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
-    }
-  }
-}
-
-resource "aws_s3_bucket_acl" "terraform_state_acl" {
-  bucket = aws_s3_bucket.terraform_state.id
-  acl    = "private"
-}
-
-resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
-  bucket = aws_s3_bucket.terraform_state.id
-
-  versioning_configuration {
-    status = "Enabled"
+  tags = {
+    Name = "${var.application_name}-private-${count.index + 1}"
   }
 }

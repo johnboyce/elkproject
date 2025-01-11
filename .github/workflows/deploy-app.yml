@@ -53,4 +53,5 @@ jobs:
             --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
             --service elkproject-service \
             --task-definition elkproject \
+            --load-balancers targetGroupArn=arn:aws:elasticloadbalancing:us-east-1:020157571320:targetgroup/elkproject-tg/4fa1193c3dd85586,containerName=elkproject-container,containerPort=8080 \
             --force-new-deployment

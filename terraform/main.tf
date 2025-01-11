@@ -17,12 +17,6 @@ module "vpc" {
   application_name = var.application_name
 }
 
-# S3 Module
-module "s3" {
-  source = "./modules/s3"
-  application_name = var.application_name
-}
-
 # Subnets Module
 module "subnets" {
   source           = "./modules/subnets"

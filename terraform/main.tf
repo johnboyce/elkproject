@@ -44,3 +44,11 @@ module "ecs" {
   ecs_task_role_arn = module.iam.ecs_task_role_arn
   ecs_task_execution_role_arn = module.iam.ecs_task_execution_role_arn
 }
+
+module "alb" {
+  source           = "./modules/alb"
+  application_name = var.application_name
+  vpc_id           = module.vpc.vpc_id
+  subnets          = module.subnets.public_subnets
+  security_groups  = [module.security_groups.alb_sg_id]
+}

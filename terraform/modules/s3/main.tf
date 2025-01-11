@@ -9,6 +9,9 @@ resource "aws_s3_bucket" "terraform_state" {
   tags = {
     Name = "${var.application_name}-state"
   }
+
+  # Conditional logic: Check if the bucket exists before creating
+  count = var.skip_bucket_creation ? 0 : 1
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_encryption" {

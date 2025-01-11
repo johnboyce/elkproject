@@ -48,10 +48,10 @@ jobs:
       - name: Build Docker Image
         working-directory: app
         run: |
-          docker build -t ${{ secrets.ECR_URI }}/elkproject:${{ github.sha }} -f src/main/docker/Dockerfile.native .
+          docker build -t ${{ secrets.ECR_URI }}:${{ github.sha }} -f src/main/docker/Dockerfile.native .
 
       - name: Push Docker Image to ECR
-        run: docker push ${{ secrets.ECR_URI }}/elkproject:${{ github.sha }}
+        run: docker push ${{ secrets.ECR_URI }}:${{ github.sha }}
 
       - name: Output Image Tag
         run: echo "IMAGE_TAG=elkproject:${{ github.sha }}" >> $GITHUB_ENV

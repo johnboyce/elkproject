@@ -81,6 +81,7 @@ jobs:
 
       - name: DEBUG Task Definition
         run: |
+          set -ex
           echo "DEBUGGING"
           cat task-def.json 
           echo "END DEBUGGING

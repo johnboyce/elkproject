@@ -27,6 +27,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Output Task Definition
+        run: |
+          cat task-definitions/quarkus-app-task.json
+
       - name: Update Task Definition File with New Image
         run: |
           sed -i "s|:latest|:${{ github.event.inputs.image_tag }}|" task-definitions/quarkus-app-task.json
@@ -34,6 +38,10 @@ jobs:
       - name: Replace Task Execution Role
         run: |
           sed -i "s|arn:aws:iam::020157571320:role/elkproject-ecs-task-execution-role|${{ secrets.ECS_TASK_EXECUTION_ROLE }}|" task-definitions/quarkus-app-task.json
+
+      - name: Output Task Definition
+        run: |
+          cat task-definitions/quarkus-app-task.json
 
       - name: Register Task Definition
         run: |

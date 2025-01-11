@@ -78,6 +78,12 @@ jobs:
           }
           EOF
 
+      - name: DEBUG Task Definition
+        run: |
+          echo "DEBUGGING"
+          cat task-def.json 
+          echo "END DEBUGGING
+
       - name: Register Task Definition
         run: |
           aws ecs register-task-definition --cli-input-json file://task-def.json > register-task-output.json

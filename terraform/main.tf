@@ -22,3 +22,11 @@ module "s3" {
   source = "./modules/s3"
   application_name = var.application_name
 }
+
+# Subnets Module
+module "subnets" {
+  source           = "./modules/subnets"
+  vpc_id           = module.vpc.vpc_id
+  vpc_cidr         = "10.0.0.0/16"
+  application_name = var.application_name
+}

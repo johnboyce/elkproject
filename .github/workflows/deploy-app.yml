@@ -51,6 +51,6 @@ jobs:
         run: |
           aws ecs update-service \
             --cluster ${{ secrets.ECS_CLUSTER_NAME }} \
-            --service-name elkproject-service \
+            --service elkproject-service \
             --task-definition elkproject \
             --force-new-deployment

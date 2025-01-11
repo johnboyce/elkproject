@@ -1,0 +1,34 @@
+# Vector configuration file
+
+# Define global options
+data_dir = "/var/lib/vector"
+
+# Sources: Where logs are collected from
+[sources.app_logs]
+type = "file"
+include = ["/var/log/app/*.log"]  # Path to your Quarkus application logs
+ignore_older_secs = 86400
+
+[sources.vector_metrics]
+type = "internal_metrics"
+
+# Transforms: Modify or enrich logs if necessary
+[transforms.parse_json]
+type = "remap"
+inputs = ["app_logs"]
+source = '''
+  .log = parse_json(.message)
+  '''
+
+# Sinks: Where logs are sent
+[sinks.elasticsearch]
+type = "elasticsearch"
+inputs = ["parse_json"]
+endpoint = "http://elasticsearch:9200"  # Replace with your Elasticsearch endpoint
+index = "quarkus-logs-%Y-%m-%d"
+encoding.codec = "json"
+
+[sinks.console]
+type = "console"
+inputs = ["app_logs"]
+target = "stdout"

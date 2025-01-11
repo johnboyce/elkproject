@@ -23,6 +23,7 @@ module "subnets" {
   vpc_id           = module.vpc.vpc_id
   vpc_cidr         = "10.0.0.0/16"
   application_name = var.application_name
+  internet_gateway_id = module.vpc.internet_gateway_id
 }
 
 module "security_groups" {

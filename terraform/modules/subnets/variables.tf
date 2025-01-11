@@ -13,3 +13,8 @@ variable "application_name" {
   description = "The name of the application"
   type        = string
 }
+
+variable "internet_gateway_id" {
+  description = "The ID of the Internet Gateway"
+  type        = string
+}

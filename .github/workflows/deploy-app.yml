@@ -84,7 +84,7 @@ jobs:
           set -ex
           echo "DEBUGGING"
           cat task-def.json 
-          echo "END DEBUGGING
+          echo "END DEBUGGING"
 
       - name: Register Task Definition
         run: |

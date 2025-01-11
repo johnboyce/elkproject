@@ -24,18 +24,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Ensure Log Group Exists
-        run: |
-          LOG_GROUP_NAME="/ecs/elkproject"
-          aws logs describe-log-groups --log-group-name-prefix $LOG_GROUP_NAME --region us-east-1 || \
-          aws logs create-log-group --log-group-name $LOG_GROUP_NAME --region us-east-1
-
-      - name: Check if Task Definition Exists
+      - name: Check If Task Definition Exists
         id: check-task
         run: |
           set +e
-          aws ecs describe-task-definition --task-definition elkproject
-          aws ecs describe-task-definition --task-definition elkproject > task-def.json 2>/dev/null
+          aws ecs describe-task-definition --task-definition elkproject > task-def-output.json 2>/dev/null
           if [ $? -eq 0 ]; then
             echo "TASK_DEFINITION_EXISTS=true" >> $GITHUB_ENV
           else
@@ -43,7 +36,7 @@ jobs:
           fi
           set -e
 
-      - name: Create Task Definition if Not Exists
+      - name: Generate New Task Definition (First Run)
         if: env.TASK_DEFINITION_EXISTS == 'false'
         run: |
           cat <<EOF > task-def.json
@@ -79,12 +72,25 @@ jobs:
           }
           EOF
 
-      - name: DEBUG Task Definition
+      - name: Prepare Task Definition for Update
+        if: env.TASK_DEFINITION_EXISTS == 'true'
         run: |
-          set -ex
-          echo "DEBUGGING"
-          cat task-def.json 
-          echo "END DEBUGGING"
+          jq '{
+            family: .taskDefinition.family,
+            networkMode: .taskDefinition.networkMode,
+            executionRoleArn: .taskDefinition.executionRoleArn,
+            containerDefinitions: (
+              .taskDefinition.containerDefinitions | map(
+                .image = "***/elkproject:${{ github.event.inputs.image_tag }}"
+              )
+            ),
+            requiresCompatibilities: .taskDefinition.requiresCompatibilities,
+            cpu: .taskDefinition.cpu,
+            memory: .taskDefinition.memory
+          }' task-def-output.json > task-def.json
+
+      - name: Debug Task Definition
+        run: cat task-def.json
 
       - name: Register Task Definition
         run: |
@@ -92,7 +98,7 @@ jobs:
           TASK_REVISION=$(jq -r '.taskDefinition.revision' register-task-output.json)
           echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
 
-      - name: Create ECS Service if Not Exists
+      - name: Create ECS Service (First Run)
         if: env.TASK_DEFINITION_EXISTS == 'false'
         run: |
           aws ecs create-service \

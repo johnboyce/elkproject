@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Quarkus Native Image
         working-directory: app
-        run: ./mvnw package -Pnative
+        run: ./mvnw package -Pnative -Dquarkus.native.container-build=true
 
       - name: Build Docker Image
         working-directory: app

@@ -125,7 +125,8 @@
                         <executions>
                             <execution>
                                 <goals>
-                                    <goal>native-image</goal>
+                                    <goal>build</goal>
+                                    <goal>package</goal>
                                 </goals>
                             </execution>
                         </executions>

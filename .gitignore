@@ -25,3 +25,10 @@ replay_pid*
 
 target/*
 .java-version
+
+/target/
+*/target/**
+**/META-INF/
+!.mvn/wrapper/maven-wrapper.jar
+*/.terraform/**
+.idea

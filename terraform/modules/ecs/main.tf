@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "main" {
 }
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/elkproject"
-  retention_in_days = 10  # Optional: Customize retention period
+  retention_in_days = 7  # Optional: Customize retention period
   tags = {
     Environment = "production"
   }

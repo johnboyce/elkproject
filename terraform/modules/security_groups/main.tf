@@ -39,14 +39,6 @@ resource "aws_security_group" "ecs_tasks" {
   description = "Security group for ECS tasks"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "Allow inbound from ALB"
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    source_security_group_id = aws_security_group.alb.id
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -60,19 +52,20 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
+resource "aws_security_group_rule" "ecs_tasks_ingress_from_alb" {
+  type                     = "ingress"
+  from_port                = 8080
+  to_port                  = 8080
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.ecs_tasks.id
+  source_security_group_id = aws_security_group.alb.id
+}
+
 # General Security Group for Private Resources
 resource "aws_security_group" "private_resources" {
   name        = "${var.application_name}-private-resources-sg"
   description = "Security group for private resources"
   vpc_id      = var.vpc_id
-
-  ingress {
-    description = "Allow inbound from ECS tasks"
-    from_port   = 9200
-    to_port     = 9300
-    protocol    = "tcp"
-    source_security_group_id = aws_security_group.ecs_tasks.id
-  }
 
   egress {
     from_port   = 0
@@ -86,3 +79,13 @@ resource "aws_security_group" "private_resources" {
     Environment = "production"
   }
 }
+
+resource "aws_security_group_rule" "private_resources_ingress_from_ecs_tasks" {
+  type                     = "ingress"
+  from_port                = 9200
+  to_port                  = 9300
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.private_resources.id
+  source_security_group_id = aws_security_group.ecs_tasks.id
+}
+

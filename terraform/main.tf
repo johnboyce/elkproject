@@ -35,3 +35,12 @@ module "iam" {
   source           = "./modules/iam"
   application_name = var.application_name
 }
+
+module "ecs" {
+  source           = "./modules/ecs"
+  application_name = var.application_name
+  vpc_id           = module.vpc.vpc_id
+  subnets          = module.subnets.public_subnets
+  ecs_task_role_arn = module.iam.ecs_task_role_arn
+  ecs_task_execution_role_arn = module.iam.ecs_task_execution_role_arn
+}

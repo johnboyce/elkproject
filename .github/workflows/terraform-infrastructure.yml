@@ -1,12 +1,16 @@
 name: Terraform Infrastructure
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+
+#on:
+#  push:
+#    branches:
+#      - main
+#  pull_request:
+#    branches:
+#      - main
 
 jobs:
   terraform:

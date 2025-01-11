@@ -1,9 +1,13 @@
-name: Deploy ECS Tasks
+name: Deploy ECS Task Definitions Revisit this :)
 
 on:
-  push:
-    branches:
-      - main
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+
+#on:
+#  push:
+#    branches:
+#      - main
 
 jobs:
   deploy:

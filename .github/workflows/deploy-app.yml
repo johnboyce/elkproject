@@ -24,6 +24,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Ensure Log Group Exists
+        run: |
+          LOG_GROUP_NAME="/ecs/elkproject"
+          aws logs describe-log-groups --log-group-name-prefix $LOG_GROUP_NAME --region us-east-1 || \
+          aws logs create-log-group --log-group-name $LOG_GROUP_NAME --region us-east-1
+
       - name: Check if Task Definition Exists
         id: check-task
         run: |

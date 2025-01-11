@@ -29,17 +29,17 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
 
-
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'temurin'  # Use Eclipse Temurin distribution
+          distribution: 'temurin'
 
-      - name: Install Docker
+      - name: Install Docker Using Official Script
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sh get-docker.sh
+          sudo usermod -aG docker $USER
 
       - name: Build Quarkus Native Image
         working-directory: app

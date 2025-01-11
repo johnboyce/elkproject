@@ -1,18 +1,18 @@
 # Stage 1: Build the Native Executable
 FROM quay.io/quarkus/ubi-quarkus-native-image:22.3-java17 AS builder
-RUN sudo apt-get install zlib1g build-essential libz-dev zlib1g-dev
+
 # Copy the application JAR and build artifacts into the container
 WORKDIR /work
 COPY target/*-runner /work/application
 
 # Stage 2: Use Red Hat's UBI Minimal Image
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.8
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.10
 
 # Copy the application binary from the builder stage
 COPY --from=builder /work/application /work/application
 
 # Install the missing library
-RUN microdnf install -y zlib && microdnf clean all
+#RUN microdnf install -y zlib && microdnf clean all
 
 # Set the binary as the entrypoint
 ENTRYPOINT ["/work/application"]

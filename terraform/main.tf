@@ -53,3 +53,17 @@ module "alb" {
   subnets          = module.subnets.public_subnets
   security_groups  = [module.security_groups.alb_sg_id]
 }
+
+module "vector_ecr" {
+  source           = "./modules/ecr"
+  repository_name  = var.vector_ecr_name
+  environment      = var.environment
+  region           = var.region
+}
+
+module "elasticsearch_ecr" {
+  source           = "./modules/ecr"
+  repository_name  = var.elasticsearch_ecr_name
+  environment      = var.environment
+  region           = var.region
+}

@@ -40,3 +40,25 @@ output "alb_dns_name" {
 output "target_group_arn" {
   value = module.alb.target_group_arn
 }
+
+output "vector_ecr_url" {
+  description = "The URL of the Vector ECR repository"
+  value       = module.vector_ecr.repository_url
+}
+
+output "vector_ecr_arn" {
+  description = "The ARN of the Vector ECR repository"
+  value       = module.vector_ecr.repository_arn
+}
+
+output "elasticsearch_ecr_url" {
+  description = "The URL of the Elasticsearch ECR repository"
+  value       = module.elasticsearch_ecr.repository_url
+}
+
+output "elasticsearch_ecr_arn" {
+  description = "The ARN of the Elasticsearch ECR repository"
+  value       = module.elasticsearch_ecr.repository_arn
+}
+
+

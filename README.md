@@ -1,5 +1,7 @@
 # ELKProject: Quarkus Application with ECS, ALB, and ELK Stack
 
+Push to dev, before pushing to main
+
 ## Overview
 
 The **ELKProject** is a Quarkus-based application that is deployed on AWS ECS Fargate. The infrastructure supports scalable deployment and centralized logging using Elasticsearch, Kibana, and Vector. This document outlines the infrastructure components, configuration, deployment steps, and mitigations for issues encountered during setup.

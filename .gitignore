@@ -30,5 +30,12 @@ target/*
 */target/**
 **/META-INF/
 !.mvn/wrapper/maven-wrapper.jar
-*/.terraform/**
 .idea
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+

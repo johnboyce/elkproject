@@ -1,0 +1,61 @@
+name: Build and Push Vector Image
+
+on:
+  push:
+    paths:
+      - 'vector/**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Get Vector ECR URL
+        id: get-ecr-url
+        run: |
+          VECTOR_ECR_URL=$(terraform output -raw vector_ecr_url)
+          echo "VECTOR_ECR_URL=${VECTOR_ECR_URL}" >> $GITHUB_ENV
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Determine Image Tag
+        id: semantic-version
+        run: |
+          VERSION="1.0.0" # Replace with your base semantic version
+          GIT_SHA=$(git rev-parse --short HEAD)
+          TAG="${VERSION}-${GIT_SHA}"
+          echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: |
+          docker build -t vector:${{ env.IMAGE_TAG }} ./vector
+          docker tag vector:${{ env.IMAGE_TAG }} ${{ env.VECTOR_ECR_URL }}:${{ env.IMAGE_TAG }}
+          docker tag vector:${{ env.IMAGE_TAG }} ${{ env.VECTOR_ECR_URL }}:latest
+
+      - name: Push Docker Image to ECR
+        run: |
+          docker push ${{ env.VECTOR_ECR_URL }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.VECTOR_ECR_URL }}:latest
+
+      - name: Output Image Tag
+        run: |
+          echo "Pushed image with tag: ${{ env.IMAGE_TAG }}"

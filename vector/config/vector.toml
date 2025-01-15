@@ -1,34 +1,37 @@
-# Vector configuration file
+# Define the global configuration
+data_dir = "/var/lib/vector" # Directory where Vector stores internal data
+api.enabled = true           # Enable the Vector API (useful for debugging)
+api.address = "0.0.0.0:8686" # Vector UI API (expose via ALB for monitoring)
 
-# Define global options
-data_dir = "/var/lib/vector"
+# Input: Collect logs from ECS
+[sources.ecs_logs]
+type = "aws_cloudwatch_logs" # Ingest logs from AWS CloudWatch
+region = "us-east-1"
+group_prefix = "/ecs"        # Collect logs from all ECS task log groups
+#assume_role = "arn:aws:iam::123456789012:role/vector-role" # (Optional) Role to assume for reading logs
 
-# Sources: Where logs are collected from
-[sources.app_logs]
-type = "file"
-include = ["/var/log/app/*.log"]  # Path to your Quarkus application logs
-ignore_older_secs = 86400
-
-[sources.vector_metrics]
-type = "internal_metrics"
-
-# Transforms: Modify or enrich logs if necessary
-[transforms.parse_json]
+# Transform: Add metadata to the logs
+[transforms.add_metadata]
 type = "remap"
-inputs = ["app_logs"]
+inputs = ["ecs_logs"]
 source = '''
   .log = parse_json(.message)
-  '''
+'''
 
-# Sinks: Where logs are sent
+# Output: Ship logs to Elasticsearch
 [sinks.elasticsearch]
 type = "elasticsearch"
-inputs = ["parse_json"]
-endpoint = "http://elasticsearch:9200"  # Replace with your Elasticsearch endpoint
-index = "quarkus-logs-%Y-%m-%d"
-encoding.codec = "json"
+inputs = ["add_metadata"]
+endpoint = "http://elasticsearch:9200"
+auth.strategy = "aws" # Use AWS authentication
+index = "ecs-logs-%Y-%m-%d" # Daily index format
+compression = "gzip"  # Compress data before sending
 
-[sinks.console]
-type = "console"
-inputs = ["app_logs"]
-target = "stdout"
+# Optional: Output: Ship logs to CloudWatch Logs
+#[sinks.cloudwatch]
+#type = "aws_cloudwatch_logs"
+#inputs = ["add_metadata"]
+#region = "us-east-1"
+#group_name = "/processed/ecs-logs"
+#stream_name = "{{ service_name }}/{{ environment }}/{{ timestamp }}"
+#encoding.codec = "json"

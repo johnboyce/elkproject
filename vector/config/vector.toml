@@ -1,37 +1,24 @@
-# Define the global configuration
-data_dir = "/var/lib/vector" # Directory where Vector stores internal data
-api.enabled = true           # Enable the Vector API (useful for debugging)
-api.address = "0.0.0.0:8686" # Vector UI API (expose via ALB for monitoring)
+# Source: Splunk HEC
+[sources.splunk_hec]
+type = "splunk_hec"
+address = "0.0.0.0:8088" # Vector listens on port 8088 for logs
+token = "VECTOR_SPLUNK_HEC_TOKEN" # Token for HEC authentication
 
-# Input: Collect logs from ECS
-[sources.ecs_logs]
-type = "aws_cloudwatch_logs" # Ingest logs from AWS CloudWatch
-region = "us-east-1"
-group_prefix = "/ecs"        # Collect logs from all ECS task log groups
-#assume_role = "arn:aws:iam::123456789012:role/vector-role" # (Optional) Role to assume for reading logs
-
-# Transform: Add metadata to the logs
+# Optional: Add metadata to incoming logs
 [transforms.add_metadata]
 type = "remap"
-inputs = ["ecs_logs"]
+inputs = ["splunk_hec"]
 source = '''
-  .log = parse_json(.message)
+  .app = "ecs-service"
+  .environment = "dev"
+  encode_json(.)
 '''
 
-# Output: Ship logs to Elasticsearch
+# Sink: Elasticsearch (or any desired destination)
 [sinks.elasticsearch]
 type = "elasticsearch"
 inputs = ["add_metadata"]
 endpoint = "http://elasticsearch:9200"
-auth.strategy = "aws" # Use AWS authentication
-index = "ecs-logs-%Y-%m-%d" # Daily index format
-compression = "gzip"  # Compress data before sending
-
-# Optional: Output: Ship logs to CloudWatch Logs
-#[sinks.cloudwatch]
-#type = "aws_cloudwatch_logs"
-#inputs = ["add_metadata"]
-#region = "us-east-1"
-#group_name = "/processed/ecs-logs"
-#stream_name = "{{ service_name }}/{{ environment }}/{{ timestamp }}"
-#encoding.codec = "json"
+index = "{{ app }}-{{ environment }}-logs"
+compression = "gzip"
+bulk_action = "index"

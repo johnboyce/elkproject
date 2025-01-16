@@ -1,4 +1,4 @@
-name: Build and Push Vector Image
+name: Vector - Build and Push Image
 
 on:
   push:

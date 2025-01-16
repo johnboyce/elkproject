@@ -10,31 +10,32 @@ resource "aws_vpc" "this" {
   }
 }
 
+# Public Subnets
 resource "aws_subnet" "public" {
-  for_each = toset(var.public_subnet_cidrs)
+  for_each = var.public_subnets
 
   vpc_id            = aws_vpc.this.id
   cidr_block        = each.key
   availability_zone = each.value
-  map_public_ip_on_launch = true # Automatically assign public IPs to instances
+  map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-public-subnet-${each.value}"
+    Name        = "${var.project_name}-${var.environment}-public-subnet-${each.value}"
     Environment = var.environment
   }
 }
 
+# Private Subnets
 resource "aws_subnet" "private" {
-  count = length(var.private_subnet_cidrs)
+  for_each = var.private_subnets
 
   vpc_id            = aws_vpc.this.id
-  cidr_block        = var.private_subnet_cidrs[count.index]
-  availability_zone = element(var.availability_zones, count.index)
+  cidr_block        = each.key
+  availability_zone = each.value
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-private-subnet-${count.index + 1}"
+    Name        = "${var.project_name}-${var.environment}-private-subnet-${each.value}"
     Environment = var.environment
-    Project     = var.project_name
   }
 }
 

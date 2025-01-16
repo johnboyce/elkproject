@@ -1,10 +1,17 @@
 module "vpc" {
   source = "../modules/vpc"
 
-  cidr_block           = "10.0.0.0/16"
-  public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
-  private_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
-  availability_zones   = ["us-east-1a", "us-east-1b"]
+  cidr_block = "10.0.0.0/16"
+
+  public_subnets = {
+    "10.0.1.0/24" = "us-east-1a"
+    "10.0.2.0/24" = "us-east-1b"
+  }
+
+  private_subnets = {
+    "10.0.101.0/24" = "us-east-1a"
+    "10.0.102.0/24" = "us-east-1b"
+  }
 
   project_name = "elkproject"
   environment  = "dev"
@@ -46,7 +53,7 @@ module "ecs_service_quarkus" {
   environment         = var.environment
   ecs_cluster_id      = module.ecs_cluster.id
   task_definition_arn = module.quarkus_task.arn
-  public_subnets      = module.vpc.public_subnets
+  public_subnets      = module.vpc.public_subnet_ids
   security_group_id   = module.security_groups.ecs_service
   target_group_arn    = module.alb.quarkus_target_group_arn
 }

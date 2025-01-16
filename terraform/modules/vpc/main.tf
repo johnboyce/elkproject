@@ -67,4 +67,9 @@ resource "aws_route_table_association" "public" {
   for_each      = aws_subnet.public
   route_table_id = aws_route_table.public.id
   subnet_id      = each.value.id
+
+  lifecycle {
+    ignore_changes = [subnet_id]
+  }
+
 }

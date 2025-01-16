@@ -2,7 +2,7 @@
 [sources.splunk_hec]
 type = "splunk_hec"
 address = "0.0.0.0:8088" # Vector listens on port 8088 for logs
-token = "VECTOR_SPLUNK_HEC_TOKEN" # Token for HEC authentication
+token = "vVVbUPkNeME00Zu6okzbN/zlqSZPGapNA4fhDwSjpNc=" # Token for HEC authentication
 
 # Optional: Add metadata to incoming logs
 [transforms.add_metadata]

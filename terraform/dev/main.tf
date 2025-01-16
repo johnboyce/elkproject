@@ -70,4 +70,5 @@ module "quarkus_task" {
   task_role_arn      = var.task_role_arn
   environment        = var.environment
   project_name       = var.project_name
+  vector_splunk_hec_token = var.vector_splunk_hec_token
 }

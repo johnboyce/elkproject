@@ -26,10 +26,29 @@ module "ecs_cluster" {
 module "alb" {
   source = "../modules/alb"
 
-  project_name     = "elkproject"
-  environment      = "dev"
+  project_name      = "elkproject"
+  environment       = "dev"
+  vpc_id            = module.vpc.vpc_id
   security_group_id = aws_security_group.alb.id
   subnet_ids        = module.vpc.public_subnet_ids
+}
+
+module "security_groups" {
+  source       = "../modules/security_groups"
+  vpc_id       = module.vpc.vpc_id
+  project_name = "elkproject"
+  environment  = "dev"
+}
+
+module "ecs_service_quarkus" {
+  source              = "../modules/ecs_service_quarkus"
+  project_name        = "elkproject"
+  environment         = "dev"
+  ecs_cluster_id      = module.ecs_cluster.id
+  task_definition_arn = module.quarkus_task.arn
+  subnet_ids          = module.vpc.private_subnets
+  security_group_id   = module.security_groups.service_security_group
+  target_group_arn    = module.alb.quarkus_target_group_arn
 }
 
 resource "aws_security_group" "alb" {

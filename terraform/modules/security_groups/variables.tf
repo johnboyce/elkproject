@@ -9,17 +9,6 @@ variable "environment" {
 }
 
 variable "vpc_id" {
-  description = "The vpc id"
+  description = "The ID of the VPC"
   type        = string
 }
-
-variable "security_group_id" {
-  description = "The security group for the ALB"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "The subnets for the ALB"
-  type        = list(string)
-}
-

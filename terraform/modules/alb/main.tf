@@ -28,4 +28,23 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+resource "aws_lb_target_group" "quarkus_tg" {
+  name     = "${var.project_name}-${var.environment}-quarkus-tg"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
+
+  health_check {
+    path                = "/health"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-quarkus-tg"
+    Environment = var.environment
+  }
+}
 

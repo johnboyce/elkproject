@@ -53,3 +53,27 @@ resource "aws_security_group" "alb" {
     Project     = "elkproject"
   }
 }
+
+module "iam" {
+  source       = "../modules/iam"
+  project_name = "elkproject"
+  environment  = "dev"
+}
+
+module "vector_task" {
+  source             = "../modules/vector_task"
+  vector_image       = var.vector_image
+  execution_role_arn = var.execution_role_arn
+  task_role_arn      = var.task_role_arn
+  environment        = var.environment
+  project_name       = var.project_name
+}
+
+module "quarkus_task" {
+  source             = "../modules/quarkus_task"
+  quarkus_image      = var.quarkus_image
+  execution_role_arn = var.execution_role_arn
+  task_role_arn      = var.task_role_arn
+  environment        = var.environment
+  project_name       = var.project_name
+}

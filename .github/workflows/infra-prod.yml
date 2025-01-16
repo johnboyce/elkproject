@@ -1,11 +1,13 @@
-name: Deploy PROD Environment
+name: Infrastructure to PROD
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - prod
 
 jobs:
   terraform:
-    name: Terraform Deploy - PROD
+    name: Deploy PROD Environment
     runs-on: ubuntu-latest
 
     steps:
@@ -30,8 +32,9 @@ jobs:
 
       - name: Plan Terraform Changes
         working-directory: terraform/prod
-        run: terraform plan -out=tfplan
+        run: terraform plan -var-file=prod.tfvars
 
       - name: Apply Terraform Changes
+        if: github.ref == 'refs/heads/prod'
         working-directory: terraform/prod
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve -var-file=prod.tfvars

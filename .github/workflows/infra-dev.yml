@@ -1,4 +1,4 @@
-name: Deploy DEV Environment
+name: Infrastructure to DEV
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   terraform:
-    name: Terraform Deploy - DEV
+    name: Deploy DEV Environment
     runs-on: ubuntu-latest
 
     steps:
@@ -32,9 +32,9 @@ jobs:
 
       - name: Plan Terraform Changes
         working-directory: terraform/dev
-        run: terraform plan -out=tfplan
+        run: terraform plan -var-file=dev.tfvars
 
       - name: Apply Terraform Changes
         if: github.ref == 'refs/heads/dev'
         working-directory: terraform/dev
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve -var-file=dev.tfvars

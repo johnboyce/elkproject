@@ -19,12 +19,13 @@ resource "aws_ecs_task_definition" "this" {
         }
       ]
       logConfiguration = {
-        logDriver = "splunk"
+        logDriver = "awslogs"
         options = {
-          splunk-url = "http://vector:8088" # Vector as Splunk HEC endpoint
-          splunk-token = var.vector_splunk_hec_token
-          splunk-index = "quarkus"
+          awslogs-group         = "quarkus-app"
+          awslogs-region        = "us-east-1",
+          awslogs-stream-prefix = "ecs"
         }
+      }
       }
     }
   ])

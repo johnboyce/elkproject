@@ -28,3 +28,7 @@ variable "project_name" {
   type        = string
 }
 
+variable "vector_splunk_hec_token" {
+  description = "The token for Splunk HEC to authenticate with Vector"
+  type        = string
+}

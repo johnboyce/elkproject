@@ -1,11 +1,11 @@
 resource "aws_ecs_task_definition" "this" {
-  family                   = "quarkus-app"
-  network_mode             = "awsvpc"
+  family             = "quarkus-app"
+  network_mode       = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-  execution_role_arn       = var.execution_role_arn
-  task_role_arn            = var.task_role_arn
+  cpu                = "256"
+  memory             = "512"
+  execution_role_arn = var.execution_role_arn
+  task_role_arn      = var.task_role_arn
 
   container_definitions = jsonencode([
     {
@@ -21,10 +21,9 @@ resource "aws_ecs_task_definition" "this" {
       logConfiguration = {
         logDriver = "splunk"
         options = {
-          splunk-url     = "http://vector:8088" # Vector as Splunk HEC endpoint
-          splunk-token   = "VECTOR_SPLUNK_HEC_TOKEN"
-          splunk-index   = "quarkus"
-          splunk-insecure = "true"
+          splunk-url = "http://vector:8088" # Vector as Splunk HEC endpoint
+          splunk-token = var.vector_splunk_hec_token
+          splunk-index = "quarkus"
         }
       }
     }

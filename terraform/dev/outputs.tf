@@ -22,3 +22,4 @@ output "alb_dns_name" {
   description = "The DNS name of the ALB in dev"
   value       = module.alb.alb_dns_name
 }
+

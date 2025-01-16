@@ -112,3 +112,9 @@ module "quarkus_task" {
   project_name       = var.project_name
   vector_splunk_hec_token = var.vector_splunk_hec_token
 }
+
+module "logging" {
+  source       = "../modules/logging"
+  environment  = "dev"
+  project_name = "elkproject"
+}

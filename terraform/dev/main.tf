@@ -10,6 +10,12 @@ module "vpc" {
   environment  = "dev"
 }
 
+module "iam" {
+  source       = "../modules/iam"
+  project_name = "elkproject"
+  environment  = "dev"
+}
+
 module "ecs_cluster" {
   source = "../modules/ecs_cluster"
 
@@ -57,8 +63,8 @@ resource "aws_security_group" "alb" {
 module "vector_task" {
   source             = "../modules/vector_task"
   vector_image       = var.vector_image
-  execution_role_arn = var.execution_role_arn
-  task_role_arn      = var.task_role_arn
+  execution_role_arn = module.iam.ecs_execution_role_arn
+  task_role_arn      = module.iam.ecs_task_role_arn
   environment        = var.environment
   project_name       = var.project_name
 }
@@ -66,8 +72,8 @@ module "vector_task" {
 module "quarkus_task" {
   source             = "../modules/quarkus_task"
   quarkus_image      = var.quarkus_image
-  execution_role_arn = var.execution_role_arn
-  task_role_arn      = var.task_role_arn
+  execution_role_arn = module.iam.ecs_execution_role_arn
+  task_role_arn      = module.iam.ecs_task_role_arn
   environment        = var.environment
   project_name       = var.project_name
   vector_splunk_hec_token = var.vector_splunk_hec_token

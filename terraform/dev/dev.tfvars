@@ -1,6 +1,4 @@
 # Dev Vars
-execution_role_arn = "arn:aws:iam::020157571320:role/elkproject-ecs-task-execution-role"
-task_role_arn      = "arn:aws:iam::020157571320:role/elkproject-ecs-task-role"
 environment        = "dev"
 project_name       = "elkproject"
 vector_splunk_hec_token = "vVVbUPkNeME00Zu6okzbN/zlqSZPGapNA4fhDwSjpNc="

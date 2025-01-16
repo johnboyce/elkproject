@@ -8,16 +8,6 @@ variable "vector_image" {
   type        = string
 }
 
-variable "execution_role_arn" {
-  description = "The ARN of the task execution role"
-  type        = string
-}
-
-variable "task_role_arn" {
-  description = "The ARN of the task role"
-  type        = string
-}
-
 variable "environment" {
   description = "The environment (e.g., dev, prod)"
   type        = string

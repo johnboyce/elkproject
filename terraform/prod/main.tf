@@ -40,7 +40,7 @@ module "ecs_service_quarkus" {
   environment         = "prod"
   ecs_cluster_id      = module.ecs_cluster.id
   task_definition_arn = module.quarkus_task.arn
-  subnet_ids          = module.vpc.private_subnets
+  subnet_ids          = module.vpc.public_subnets
   security_group_id   = module.security_groups.service_security_group
   target_group_arn    = module.alb.quarkus_target_group_arn
 }

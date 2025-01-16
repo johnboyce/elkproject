@@ -21,7 +21,7 @@ resource "aws_ecs_task_definition" "this" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "quarkus-app"
+          awslogs-group         = "quarkus-app",
           awslogs-region        = "us-east-1",
           awslogs-stream-prefix = "ecs"
         }

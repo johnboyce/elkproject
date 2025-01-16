@@ -32,6 +32,11 @@ resource "aws_iam_role_policy" "ecs_task_policy" {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "secretsmanager:GetSecretValue"]
         Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+        Resource = "*"
       }
     ]
   })

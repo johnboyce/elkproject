@@ -3,7 +3,7 @@ resource "aws_subnet" "public" {
   vpc_id = var.vpc_id
   cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index)
   availability_zone = element(["us-east-1a", "us-east-1b", "us-east-1c"], count.index)
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name = "${var.application_name}-public-${count.index + 1}"

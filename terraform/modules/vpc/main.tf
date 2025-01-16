@@ -11,17 +11,16 @@ resource "aws_vpc" "this" {
 }
 
 resource "aws_subnet" "public" {
-  count = length(var.public_subnet_cidrs)
+  for_each = toset(var.public_subnet_cidrs)
 
   vpc_id            = aws_vpc.this.id
-  cidr_block        = var.public_subnet_cidrs[count.index]
-  map_public_ip_on_launch = true
-  availability_zone = element(var.availability_zones, count.index)
+  cidr_block        = each.key
+  availability_zone = each.value
+  map_public_ip_on_launch = true # Automatically assign public IPs to instances
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-public-subnet-${count.index + 1}"
+    Name = "${var.project_name}-${var.environment}-public-subnet-${each.value}"
     Environment = var.environment
-    Project     = var.project_name
   }
 }
 
@@ -65,9 +64,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  count = length(var.public_subnet_cidrs)
-
-  subnet_id      = aws_subnet.public[count.index].id
+  for_each      = aws_subnet.public
   route_table_id = aws_route_table.public.id
+  subnet_id      = each.value.id
 }
-

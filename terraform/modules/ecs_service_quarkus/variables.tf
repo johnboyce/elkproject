@@ -18,8 +18,8 @@ variable "task_definition_arn" {
   type        = string
 }
 
-variable "subnet_ids" {
-  description = "List of subnet IDs for ECS tasks"
+variable "public_subnets" {
+  description = "List of public subnet IDs for ECS tasks"
   type        = list(string)
 }
 

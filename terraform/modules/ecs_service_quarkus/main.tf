@@ -5,22 +5,16 @@ resource "aws_ecs_service" "quarkus_service" {
   desired_count   = 1
   launch_type     = "FARGATE"
 
-  # Network configuration
   network_configuration {
-    subnets         = var.subnet_ids
+    subnets         = var.public_subnets # Use public subnets
     security_groups = [var.security_group_id]
-    assign_public_ip = false
+    assign_public_ip = true # Assign public IP to ECS tasks
   }
 
-  # ALB integration
   load_balancer {
     target_group_arn = var.target_group_arn
     container_name   = "quarkus-app"
     container_port   = 8080
-  }
-
-  deployment_controller {
-    type = "ECS"
   }
 
   tags = {

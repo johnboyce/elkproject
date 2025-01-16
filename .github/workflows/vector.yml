@@ -24,8 +24,6 @@ jobs:
       - name: Get Vector ECR URL
         id: get-ecr-url
         run: |
-#          VECTOR_ECR_URL=$(terraform output -raw vector_ecr_url)
-          #TODO: Vector ECR was not created in Terraform
           VECTOR_ECR_URL=020157571320.dkr.ecr.us-east-1.amazonaws.com/vector          
           echo "VECTOR_ECR_URL=${VECTOR_ECR_URL}" >> $GITHUB_ENV
 
